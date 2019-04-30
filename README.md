@@ -16,11 +16,20 @@
 * コマンドプロンプトを起動、作業ディレクトリまで移動
 
 * 文字コードをUTF-8 に変更
+	```
+	> chcp 65001
+	```
+
+* プラグインのインストール
+	```
+	> vagrant plugin install vagrant-vbguest
+	```
 
 * Vagrantfile を作成
 	```
 	> vagrant init
 	```
+	
 * Vagrantfile を編集
 	```
 	# -*- mode: ruby -*-
@@ -30,6 +39,9 @@
 	  config.vm.box = "centos/7"
 
 	  config.vm.network "private_network", ip: "192.168.33.10"
+
+	  config.vm.synced_folder "./share/etc", "/tmp/etc"
+	  config.vm.synced_folder "./share/webapp/go", "/home/isucon/torb/webapp/go"
 
 	  config.vm.provider "virtualbox" do |vb|
 	    vb.memory = "1024"
@@ -67,7 +79,7 @@
 * 設定ファイル編集（development）
 	```
 	$ cd isucon8-qualify/provisioning
-	$ vim development
+	$ vi development
 	$ cat development
 	[portal_web]
 	# ポータルをデプロイするサーバ
