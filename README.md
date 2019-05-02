@@ -40,8 +40,7 @@
 
 	  config.vm.network "private_network", ip: "192.168.33.10"
 
-	  config.vm.synced_folder "./share/etc", "/tmp/etc"
-	  config.vm.synced_folder "./share/webapp/go", "/home/isucon/torb/webapp/go"
+	  config.vm.synced_folder ".", "/vagrant", type: "virtualbox"
 
 	  config.vm.provider "virtualbox" do |vb|
 	    vb.memory = "1024"
@@ -54,6 +53,24 @@
 * 仮想マシンの起動
 	```
 	> vagrant up
+	```
+
+* 仮想マシンにSSH接続
+	```
+	> vagrant ssh
+	```
+
+### OS設定（SELinux）
+
+* SELinux の無効化
+	```
+	$ sudo vi /etc/selinux/config
+	  → SELINUX=enforcing → SELINUX=disabled
+	```
+
+* 仮想マシンの再起動
+	```
+	$ sudo shutdown -r 0
 	```
 
 * 仮想マシンにSSH接続
@@ -97,6 +114,17 @@
 	# 競技用webappをデプロイするサーバ(3)
 	```
 	
+* 設定ファイル編集（development）
+	```
+	$ cd isucon8-qualify/provisioning
+	$ vi bench.yml
+	$ cat bench.yml
+	...
+	#- start_bench_worker
+	...
+	```
+
+
 * Ansible の実行
 	```
 	$ ansible-playbook -i development site.yml
@@ -146,12 +174,18 @@
 	$ ./db/init.sh
 	```
 
-* ポート開放
+* ポート開放(実施不要)
 	```
 	$ sudo firewall-cmd --zone=public --add-port=8080/tcp --permanent
 	$ sudo firewall-cmd --reload
 	$ sudo firewall-cmd --list-all
 	  →  ports: 8080/tcp を確認
+	```
+
+* h2o の起動
+	```
+	$ systemctl status h2o
+	$ sudo systemctl start h2o
 	```
 
 * 参考実装を動かす(golang)
@@ -162,25 +196,24 @@
 	$ export DB_PORT=3306
 	$ export DB_USER=isucon
 	$ export DB_PASS=isucon
+	$ make deps
 	$ make
 	  → torb バイナリを確認
-	$ ./torb
+	$ sudo systemctl stop torb.perl
+	$ sudo systemctl start torb.go
 	```
 
 ### 動作確認
 
-* ホストOSのブラウザで http://192.168.33.10:8080/ にアクセス
+* ホストOSのブラウザで http://192.168.33.10/ にアクセス
 
 ### ベンチマーク
 
-* もう一つコマンドプロンプトを起動し、`vagrant ssh`
-
 * ベンチマークの実行
 	```
-	$ sudo -i -u isucon
 	$ cd ~/torb/bench
 	$ ./bin/bench -h # ヘルプ確認
-	$ ./bin/bench -remotes=127.0.0.1:8080 -output result.json
+	$ ./bin/bench -remotes=127.0.0.1 -output result.json
 	```
 
 * 結果確認

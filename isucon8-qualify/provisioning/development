@@ -1,0 +1,18 @@
+[portal_web]
+# ポータルをデプロイするサーバ
+
+
+[bench]
+localhost ansible_connection=local
+
+
+[webapp1]
+localhost ansible_connection=local
+
+
+[webapp2]
+# 競技用webappをデプロイするサーバ(2)
+
+
+[webapp3]
+# 競技用webappをデプロイするサーバ(3)

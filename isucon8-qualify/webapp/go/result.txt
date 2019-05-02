@@ -1,0 +1,180 @@
+
+# 143.4s user time, 210ms system time, 37.12M rss, 232.09M vsz
+# Current date: Thu May  2 02:38:58 2019
+# Hostname: localhost.localdomain
+# Files: /var/log/mariadb/slow.log
+# Overall: 337.70k total, 45 unique, 3.04k QPS, 1.46x concurrency ________
+# Time range: 2019-05-02 02:30:48 to 02:32:39
+# Attribute          total     min     max     avg     95%  stddev  median
+# ============     ======= ======= ======= ======= ======= ======= =======
+# Exec time           162s     1us     26s   479us   185us    71ms    80us
+# Lock time            84s       0     15s   249us    14us    48ms       0
+# Rows sent        540.49k       0 187.33k    1.64    0.99  456.32       0
+# Rows examine       3.51M       0 749.34k   10.89   13.83   1.91k       0
+# Query size        36.15M       5 674.28k  112.25  151.03   4.89k   31.70
+
+# Profile
+# Rank Query ID           Response time Calls  R/Call  V/M   Item
+# ==== ================== ============= ====== ======= ===== =============
+#    1 0xA2139C3B1F592B2E 72.2962 44.7%     18  4.0165  6.10 SELECT sheets reservations
+#    2 0xA5A259F6E743725C 42.7043 26.4%      2 21.3521  2.47 SELECT reservations sheets events
+#    3 0x1CD6B7B2D4DD4B20 18.6375 11.5% 112000  0.0002  0.01 SELECT reservations
+#    4 0x99AA0165670CE848 10.2182  6.3% 112446  0.0001  0.00 ADMIN PREPARE
+#    5 0x8B412AA0A5E896E5  8.0977  5.0%      4  2.0244  6.05 SELECT reservations sheets events
+# MISC 0xMISC              9.8592  6.1% 113233  0.0001   0.0 <40 ITEMS>
+
+# Query 1: 0.35 QPS, 1.39x concurrency, ID 0xA2139C3B1F592B2E at byte 95039977
+# Scores: V/M = 6.10
+# Time range: 2019-05-02 02:31:24 to 02:32:16
+# Attribute    pct   total     min     max     avg     95%  stddev  median
+# ============ === ======= ======= ======= ======= ======= ======= =======
+# Count          0      18
+# Exec time     44     72s     3ms     15s      4s     13s      5s      3s
+# Lock time     85     72s    17us     15s      4s     13s      5s      3s
+# Rows sent      0      18       1       1       1       1       0       1
+# Rows examine   0  29.49k    1001  12.86k   1.64k  964.41   2.65k  964.41
+# Query size     0   2.95k     168     168     168     168       0     168
+# String:
+# Databases    torb
+# Hosts        localhost
+# Users        isucon
+# Query_time distribution
+#   1us
+#  10us
+# 100us
+#   1ms  ################################################################
+#  10ms  ########
+# 100ms
+#    1s  ################################################
+#  10s+  ########################
+# Tables
+#    SHOW TABLE STATUS FROM `torb` LIKE 'sheets'\G
+#    SHOW CREATE TABLE `torb`.`sheets`\G
+#    SHOW TABLE STATUS FROM `torb` LIKE 'reservations'\G
+#    SHOW CREATE TABLE `torb`.`reservations`\G
+# EXPLAIN /*!50100 PARTITIONS*/
+SELECT * FROM sheets WHERE id NOT IN (SELECT sheet_id FROM reservations WHERE event_id = 11 AND canceled_at IS NULL FOR UPDATE) AND `rank` = 'C' ORDER BY RAND() LIMIT 1\G
+
+# Query 2: 0.13 QPS, 2.85x concurrency, ID 0xA5A259F6E743725C at byte 95039512
+# Scores: V/M = 2.47
+# Time range: 2019-05-02 02:32:16 to 02:32:31
+# Attribute    pct   total     min     max     avg     95%  stddev  median
+# ============ === ======= ======= ======= ======= ======= ======= =======
+# Count          0       2
+# Exec time     26     43s     16s     26s     21s     26s      7s     21s
+# Lock time      0   804ms    28ms   776ms   402ms   776ms   528ms   402ms
+# Rows sent     69 374.65k 187.32k 187.33k 187.33k 187.33k    3.54 187.33k
+# Rows examine  41   1.46M 749.32k 749.34k 749.33k 749.34k   14.14 749.33k
+# Query size     0     512     256     256     256     256       0     256
+# String:
+# Databases    torb
+# Hosts        localhost
+# Users        isucon
+# Query_time distribution
+#   1us
+#  10us
+# 100us
+#   1ms
+#  10ms
+# 100ms
+#    1s
+#  10s+  ################################################################
+# Tables
+#    SHOW TABLE STATUS FROM `torb` LIKE 'reservations'\G
+#    SHOW CREATE TABLE `torb`.`reservations`\G
+#    SHOW TABLE STATUS FROM `torb` LIKE 'sheets'\G
+#    SHOW CREATE TABLE `torb`.`sheets`\G
+#    SHOW TABLE STATUS FROM `torb` LIKE 'events'\G
+#    SHOW CREATE TABLE `torb`.`events`\G
+# EXPLAIN /*!50100 PARTITIONS*/
+select r.*, s.rank as sheet_rank, s.num as sheet_num, s.price as sheet_price, e.id as event_id, e.price as event_price from reservations r inner join sheets s on s.id = r.sheet_id inner join events e on e.id = r.event_id order by reserved_at asc for update\G
+
+# Query 3: 1.29k QPS, 0.21x concurrency, ID 0x1CD6B7B2D4DD4B20 at byte 84637162
+# Scores: V/M = 0.01
+# Time range: 2019-05-02 02:31:12 to 02:32:39
+# Attribute    pct   total     min     max     avg     95%  stddev  median
+# ============ === ======= ======= ======= ======= ======= ======= =======
+# Count         33  112000
+# Exec time     11     19s    75us   301ms   166us   224us     1ms   144us
+# Lock time      1      2s     9us   256us    14us    20us     8us    12us
+# Rows sent     10  55.84k       0       1    0.51    0.99    0.50    0.99
+# Rows examine  19 710.10k       0      26    6.49   16.81    6.56    6.98
+# Query size    45  16.53M     152     156  154.74  151.03       0  151.03
+# String:
+# Databases    torb
+# Hosts        localhost
+# Users        isucon
+# Query_time distribution
+#   1us
+#  10us  #
+# 100us  ################################################################
+#   1ms  #
+#  10ms  #
+# 100ms  #
+#    1s
+#  10s+
+# Tables
+#    SHOW TABLE STATUS FROM `torb` LIKE 'reservations'\G
+#    SHOW CREATE TABLE `torb`.`reservations`\G
+# EXPLAIN /*!50100 PARTITIONS*/
+SELECT * FROM reservations WHERE event_id = 19 AND sheet_id = 352 AND canceled_at IS NULL GROUP BY event_id, sheet_id HAVING reserved_at = MIN(reserved_at)\G
+
+# Query 4: 1.29k QPS, 0.12x concurrency, ID 0x99AA0165670CE848 at byte 92134103
+# Scores: V/M = 0.00
+# Time range: 2019-05-02 02:31:12 to 02:32:39
+# Attribute    pct   total     min     max     avg     95%  stddev  median
+# ============ === ======= ======= ======= ======= ======= ======= =======
+# Count         33  112446
+# Exec time      6     10s    43us     8ms    90us   131us    34us    80us
+# Lock time      0       0       0       0       0       0       0       0
+# Rows sent      0       0       0       0       0       0       0       0
+# Rows examine   0       0       0       0       0       0       0       0
+# Query size     8   3.22M      30      30      30      30       0      30
+# String:
+# Databases    torb
+# Hosts        localhost
+# Users        isucon
+# Query_time distribution
+#   1us
+#  10us  ################################################################
+# 100us  ##############
+#   1ms  #
+#  10ms
+# 100ms
+#    1s
+#  10s+
+administrator command: Prepare\G
+
+# Query 5: 0.24 QPS, 0.48x concurrency, ID 0x8B412AA0A5E896E5 at byte 82303430
+# Scores: V/M = 6.05
+# Time range: 2019-05-02 02:31:49 to 02:32:06
+# Attribute    pct   total     min     max     avg     95%  stddev  median
+# ============ === ======= ======= ======= ======= ======= ======= =======
+# Count          0       4
+# Exec time      5      8s   176us      8s      2s      8s      4s      4s
+# Lock time      9      8s    19us      8s      2s      8s      4s      4s
+# Rows sent      0       7       0       7    1.75    6.98    3.02       0
+# Rows examine   0      30       0      21    7.50   20.43    8.39   14.67
+# Query size     0   1.02k     260     260     260     260       0     260
+# String:
+# Databases    torb
+# Hosts        localhost
+# Users        isucon
+# Query_time distribution
+#   1us
+#  10us
+# 100us  ################################################################
+#   1ms
+#  10ms
+# 100ms
+#    1s  #####################
+#  10s+
+# Tables
+#    SHOW TABLE STATUS FROM `torb` LIKE 'reservations'\G
+#    SHOW CREATE TABLE `torb`.`reservations`\G
+#    SHOW TABLE STATUS FROM `torb` LIKE 'sheets'\G
+#    SHOW CREATE TABLE `torb`.`sheets`\G
+#    SHOW TABLE STATUS FROM `torb` LIKE 'events'\G
+#    SHOW CREATE TABLE `torb`.`events`\G
+# EXPLAIN /*!50100 PARTITIONS*/
+SELECT r.*, s.rank AS sheet_rank, s.num AS sheet_num, s.price AS sheet_price, e.price AS event_price FROM reservations r INNER JOIN sheets s ON s.id = r.sheet_id INNER JOIN events e ON e.id = r.event_id WHERE r.event_id = 11 ORDER BY reserved_at ASC FOR UPDATE\G
