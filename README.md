@@ -1,4 +1,4 @@
-# ISUCON8 予選 環境構築手順
+# ISUCON8予選 練習環境構築手順
 
 ## 前提
 * Windows 10 Home

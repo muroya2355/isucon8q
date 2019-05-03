@@ -45,6 +45,7 @@ Vagrant.configure("2") do |config|
   # argument is a set of non-required options.
   # config.vm.synced_folder ".", "/vagrant", type: "virtualbox"
   config.vm.synced_folder "./isucon8-qualify/webapp/go", "/home/isucon/torb/webapp/go", type: "virtualbox"
+  config.vm.synced_folder "./isucon8-qualify/db", "/home/isucon/torb/db", type: "virtualbox"
 
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
